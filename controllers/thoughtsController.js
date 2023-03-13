@@ -1,4 +1,4 @@
-const { Thought } = require('../models')
+const { Thought, Reaction } = require('../models')
 
 module.exports = {
     getThoughts(req, res) {
@@ -45,8 +45,8 @@ module.exports = {
     createReaction(req, res) {
         Thought.findById(req.params.thoughtId)
             .then((thought) => {
-                const newReaction = new reactionSchema({
-                    reactionText: req.body.reactionBody,
+                const newReaction = new Reaction({
+                    reactionText: req.body.reactionText,
                     username: req.body.username,
                 });
 
@@ -60,5 +60,27 @@ module.exports = {
             .catch((err) => {
                 res.status(500).json(err);
             });
+    },
+    deleteReaction(req, res){
+        Thought.findOne({ _id: req.params.thoughtId })
+            .then((thought) => {
+                if (!thought){
+                    res.status(404).json({ message: 'No thought found with that ID'})
+                } else {
+                    for(i=0; i<thought.reactions.length; i++){
+                        if(thought.reactions[i]._id == req.params.reactionId){
+                            thought.reactions.splice(i, 1)
+                        }
+                        thought.save()
+                    .then(updatedThought => {
+                        res.status(200).json(updatedThought)
+                    })
+                    .catch(err => {
+                        res.status(500).json(err)
+                    })
+                    }
+                }
+             })
+            .catch((err) => res.status(500).json(err))
     },
 }
