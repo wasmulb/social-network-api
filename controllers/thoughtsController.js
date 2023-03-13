@@ -1,4 +1,4 @@
-const { Thought, Reaction } = require('../models')
+const { Thought, Reaction, User } = require('../models')
 
 module.exports = {
     getThoughts(req, res) {
@@ -16,9 +16,26 @@ module.exports = {
             .catch((err) => res.status(500).json(err))
     },
     createThought(req, res) {
-        Thought.create(req.body)
-            .then((thought) => res.json(thought))
-            .catch((err) => res.status(500).json(err))
+        User.findById(req.body.userId)
+        .then((user)=> {
+            return Thought.create({
+                thoughtText: req.body.thoughtText,
+                username: req.body.username,
+                userId: req.body.userId
+            })
+            .then((thought)=> {
+                user.thoughts.push(thought._id);
+                return user.save();
+            })
+            .then((user) => {
+                res.json(user);
+            })
+            .catch((err)=> res.status(500).json(err));
+        })
+        .catch((err) => {
+            res.status(500).json(err);
+            console.log(err);
+        });
     },
     updateThought(req, res) {
         const { thoughtText } = req.body
