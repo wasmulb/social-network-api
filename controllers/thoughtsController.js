@@ -45,8 +45,8 @@ module.exports = {
     createReaction(req, res) {
         Thought.findById(req.params.thoughtId)
             .then((thought) => {
-                const newReaction = new Reaction({
-                    reactionBody: req.body.reactionBody,
+                const newReaction = new reactionSchema({
+                    reactionText: req.body.reactionBody,
                     username: req.body.username,
                 });
 
